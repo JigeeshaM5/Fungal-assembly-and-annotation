@@ -1,0 +1,26 @@
+name: AAFTF
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.10
+  - biopython
+  - samtools
+  - bwa
+  - minimap2
+  - pilon
+  - blast
+  - diamond
+  - sourmash
+  - bowtie2
+  - trimmomatic
+  - spades
+  - fastp
+  - novoplasty
+  - bbmap
+  - ncbi-fcs-gx
+  - masurca
+  - nextpolish
+  - pip
+  - pip:
+    - AAFTF
