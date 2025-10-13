@@ -1,0 +1,4 @@
+left: data/sample_R1.fastq.gz
+right: data/sample_R2.fastq.gz
+seed: data/seed.fasta
+start_gene: data/start_gene.fasta
