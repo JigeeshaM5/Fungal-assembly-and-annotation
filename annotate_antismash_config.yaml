@@ -1,0 +1,12 @@
+cpus: 16
+busco: fungi_odb10
+samples:
+  - O_ips_WIN_M_1478
+  - O_ips_WIN_M_1480
+metadata:
+  O_ips_WIN_M_1478:
+    species: Ophiostoma ips
+    strain: WIN_M_1478
+  O_ips_WIN_M_1480:
+    species: Ophiostoma ips
+    strain: WIN_M_1480
