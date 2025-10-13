@@ -1,0 +1,4 @@
+cpus: 16
+samples:
+  - O_ips_WIN_M_1478
+  - O_ips_WIN_M_1480
