@@ -1,0 +1,23 @@
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    openjdk-11-jre \
+    git \
+    wget \
+    unzip \
+    build-essential \
+    bbmap \
+    ncbi-blast+ \
+    circos
+
+# Install AAFTF
+RUN pip3 install AAFTF
+
+# Install Snakemake
+RUN pip3 install snakemake
+
+WORKDIR /app
+COPY . .
+ENTRYPOINT ["snakemake"]
