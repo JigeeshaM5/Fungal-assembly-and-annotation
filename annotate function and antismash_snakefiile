@@ -1,0 +1,26 @@
+configfile: "config/config.yaml"
+
+rule all:
+    input:
+        expand("results/{{sample}}/annotate_misc/antiSMASH.results.gbk", sample=config["samples"])
+
+rule annotate:
+    input:
+        genome="genomes/{sample}.masked.fasta",
+        template="lib/sbt/{strain}.sbt"
+    output:
+        gbk="results/{sample}/annotate_misc/antiSMASH.results.gbk"
+    params:
+        species=lambda wildcards: config["metadata"][wildcards.sample]["species"],
+        strain=lambda wildcards: config["metadata"][wildcards.sample]["strain"]
+    shell:
+        "funannotate annotate --sbt {input.template} --busco_db {config['busco']} -i results/{wildcards.sample} \
+         --species \"{params.species}\" --strain \"{params.strain}\" --cpus {config['cpus']}"
+
+rule sync_antismash:
+    input:
+        antismash="results/{sample}/antismash_local/{species}_{sample}.gbk"
+    output:
+        gbk="results/{sample}/annotate_misc/antiSMASH.results.gbk"
+    shell:
+        "rsync -a {input.antismash} {output.gbk}"
