@@ -1,0 +1,26 @@
+configfile: "config/config.yaml"
+
+rule all:
+    input:
+        "results/novoplasty/rotated_mito.fasta"
+
+rule run_novoplasty:
+    input:
+        left="data/sample_R1.fastq.gz",
+        right="data/sample_R2.fastq.gz",
+        seed="data/seed.fasta"
+    output:
+        config="results/novoplasty/novo-config.txt",
+        log="results/novoplasty/novoplasty.log",
+        draft="results/novoplasty/draft_mito.fasta"
+    shell:
+        "NOVOPlasty.pl -c {output.config} > {output.log} 2>&1 && cp $(find results/novoplasty -name 'Circularized_assembly_*' -o -name 'Contigs_1_*' -o -name 'Uncircularized_assemblies_*') {output.draft}"
+
+rule rotate_mito:
+    input:
+        draft="results/novoplasty/draft_mito.fasta",
+        start="data/start_gene.fasta"
+    output:
+        "results/novoplasty/rotated_mito.fasta"
+    shell:
+        "python scripts/orient_to_start.py {input.draft} {output} --start {input.start}"
