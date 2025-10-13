@@ -1,0 +1,41 @@
+configfile: "config/config.yaml"
+
+rule all:
+    input:
+        "results/trimmed/sample_1P.fastq.gz",
+        "results/trimmed/sample_2P.fastq.gz"
+
+rule bbduk_trim:
+    input:
+        left=config["left"],
+        right=config["right"]
+    output:
+        left="results/trimmed/sample_1P.fastq.gz",
+        right="results/trimmed/sample_2P.fastq.gz"
+    params:
+        cpus=config["cpus"],
+        minlen=config["minlen"],
+        avgqual=config["avgqual"]
+    shell:
+        "bbduk.sh ref=adapters in1={input.left} in2={input.right} out1={output.left} out2={output.right} \
+         t={params.cpus} ktrim=r k=23 mink=11 minlen={params.minlen} maq={params.avgqual} hdist=1 ftm=5 tpe tbo overwrite=true"
+
+rule trimmomatic_trim:
+    input:
+        left=config["left"],
+        right=config["right"]
+    output:
+        left="results/trimmed/sample_1P.fastq.gz",
+        right="results/trimmed/sample_2P.fastq.gz"
+    params:
+        jar=config["trimmomatic_jar"],
+        adaptors=config["trimmomatic_adaptors"],
+        leading=config["trimmomatic_leading"],
+        trailing=config["trimmomatic_trailing"],
+        sliding=config["trimmomatic_sliding"],
+        minlen=config["minlen"]
+    shell:
+        "java -jar {params.jar} PE -threads {config['cpus']} \
+         {input.left} {input.right} \
+         {output.left} unpaired1.fastq.gz {output.right} unpaired2.fastq.gz \
+         ILLUMINACLIP:{params.adaptors}:2:30:10 {params.leading} {params.trailing} {params.sliding} MINLEN:{params.minlen}"
