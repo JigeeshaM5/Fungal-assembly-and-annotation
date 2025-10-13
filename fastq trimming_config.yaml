@@ -1,0 +1,10 @@
+left: data/sample_R1.fastq.gz
+right: data/sample_R2.fastq.gz
+cpus: 8
+minlen: 50
+avgqual: 10
+trimmomatic_jar: /opt/trimmomatic/trimmomatic-0.39.jar
+trimmomatic_adaptors: /opt/trimmomatic/adapters/TruSeq3-PE.fa
+trimmomatic_leading: 3
+trimmomatic_trailing: 3
+trimmomatic_sliding: 4:15
