@@ -1,0 +1,31 @@
+configfile: "config/config.yaml"
+
+rule all:
+    input:
+        expand("results/{{sample}}/combined.lib", sample=config["samples"])
+
+rule build_database:
+    input:
+        genome="genomes/{sample}.masked.fasta"
+    output:
+        db="results/{sample}/{sample}.nhr"
+    shell:
+        "BuildDatabase -name results/{wildcards.sample}/{wildcards.sample} {input.genome}"
+
+rule repeatmodeler:
+    input:
+        db="results/{sample}/{sample}.nhr"
+    output:
+        lib="results/{sample}/repeatmodeler.lib"
+    shell:
+        "RepeatModeler -threads {config['cpus']} -database results/{wildcards.sample}/{wildcards.sample} -LTRStruct && \
+         cp results/{wildcards.sample}/RM_*/consensi.fa.classified {output.lib}"
+
+rule combine_library:
+    input:
+        lib="results/{sample}/repeatmodeler.lib",
+        fungi="lib/fungi_repeat.20170127.lib.gz"
+    output:
+        "results/{sample}/combined.lib"
+    shell:
+        "cp {input.lib} {output} && zcat {input.fungi} >> {output}"
