@@ -1,0 +1,70 @@
+configfile: "config/config.yaml"
+
+rule all:
+    input:
+        "results/rmdup/cleaned.fasta"
+
+rule trim:
+    input:
+        left="data/sample_R1.fastq.gz",
+        right="data/sample_R2.fastq.gz"
+    output:
+        left="results/trimmed/sample_1P.fastq.gz",
+        right="results/trimmed/sample_2P.fastq.gz"
+    shell:
+        "bbduk.sh in1={input.left} in2={input.right} out1={output.left} out2={output.right} qtrim=r trimq=10 minlength=50"
+
+rule mito:
+    input:
+        left="results/trimmed/sample_1P.fastq.gz",
+        right="results/trimmed/sample_2P.fastq.gz"
+    output:
+        "results/mito/sample.mito.fasta"
+    shell:
+        "AAFTF mito --left {input.left} --right {input.right} --out {output} --minlen 10000 --maxlen 100000"
+
+rule filter:
+    input:
+        left="results/trimmed/sample_1P.fastq.gz",
+        right="results/trimmed/sample_2P.fastq.gz",
+        mito="results/mito/sample.mito.fasta"
+    output:
+        left="results/filtered/sample_filtered_1.fastq.gz",
+        right="results/filtered/sample_filtered_2.fastq.gz"
+    shell:
+        "AAFTF filter --left {input.left} --right {input.right} --screen_local {input.mito} --out1 {output.left} --out2 {output.right}"
+
+rule assemble:
+    input:
+        left="results/filtered/sample_filtered_1.fastq.gz",
+        right="results/filtered/sample_filtered_2.fastq.gz"
+    output:
+        "results/assembly/sample.spades.fasta"
+    shell:
+        "AAFTF assemble --left {input.left} --right {input.right} --out {output} --method spades --careful"
+
+rule vecscreen:
+    input:
+        "results/assembly/sample.spades.fasta"
+    output:
+        "results/vecscreen/sample.vecscreen.fasta"
+    shell:
+        "AAFTF vecscreen --infile {input} --outfile {output} --stringency high"
+
+rule sourpurge:
+    input:
+        fasta="results/vecscreen/sample.vecscreen.fasta",
+        left="results/filtered/sample_filtered_1.fastq.gz",
+        right="results/filtered/sample_filtered_2.fastq.gz"
+    output:
+        "results/sourpurge/sample.sourpurge.fasta"
+    shell:
+        "AAFTF sourpurge --input {input.fasta} --left {input.left} --right {input.right} --out {output} --kmer 31"
+
+rule rmdup:
+    input:
+        "results/sourpurge/sample.sourpurge.fasta"
+    output:
+        "results/rmdup/cleaned.fasta"
+    shell:
+        "AAFTF rmdup --input {input} --out {output} --minlen 1000 --percent_id 95 --percent_cov 95"
